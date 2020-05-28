@@ -2,14 +2,18 @@
 // Licensed under the MIT license.
 
 using Microsoft.Dynamics365.UIAutomation.Browser;
+using OpenQA.Selenium;
+using OpenQA.Selenium.Interactions;
 using System;
 using System.Collections.Generic;
+using System.Web;
 
 namespace Microsoft.Dynamics365.UIAutomation.Api.UCI
 {
     public class XrmApp : IDisposable
     {
         internal WebClient _client;
+        internal IWebDriver _driver => _client._driver;
 
         public List<ICommandResult> CommandResults => _client.CommandResults;
 
@@ -47,6 +51,40 @@ namespace Microsoft.Dynamics365.UIAutomation.Api.UCI
         public void ThinkTime(TimeSpan timespan)
         {
             _client.ThinkTime((int)timespan.TotalMilliseconds);
+        }
+
+        /// <summary>
+        /// Replicates a click on the first element in a standard view table - NOTE: Requires that the first column be the anchor tag with a link to the main view form
+        /// </summary>
+        /// <param name="cssSelector">String selector to click on</param>
+        public void ClickFirstElementBySelector(string cssSelector)
+        {
+            Actions actions = new Actions(this._driver);
+            IWebElement element = this._driver.FindElement(By.CssSelector(cssSelector));
+            actions.Click(element);
+            actions.Build();
+            actions.Perform();
+            this.ThinkTime(2000);
+        }
+
+        /// <summary>
+        /// Clicks the 'Discard Changes' button on modal when trying to cancel out of saving things
+        /// </summary>
+        public void ClickDiscardChangesButton()
+        {
+            this.ThinkTime(2000);
+            Actions actions = new Actions(this._driver);
+            IWebElement element = this._driver.FindElement(By.Id("cancelButtonTextName"));
+            actions.Click(element);
+            actions.Build();
+            actions.Perform();
+            this.ThinkTime(2000);
+        }
+
+        public string GetQueryParameter(string paramName)
+        {
+            var url = this._driver.Url;
+            return HttpUtility.ParseQueryString(url).Get(paramName);
         }
 
         public void Dispose()

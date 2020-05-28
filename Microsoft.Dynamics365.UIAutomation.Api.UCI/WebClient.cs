@@ -22,11 +22,13 @@ namespace Microsoft.Dynamics365.UIAutomation.Api.UCI
     public class WebClient : BrowserPage
     {
         public List<ICommandResult> CommandResults => Browser.CommandResults;
+        public IWebDriver _driver;//  = Browser.Driver
         public Guid ClientSessionId;
 
         public WebClient(BrowserOptions options)
         {
             Browser = new InteractiveBrowser(options);
+            this._driver = Browser.Driver;
             OnlineDomains = Constants.Xrm.XrmDomains;
             ClientSessionId = Guid.NewGuid();
         }
